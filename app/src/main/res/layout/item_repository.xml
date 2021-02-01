@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="2dp"
+    android:elevation="2dp"
+    app:cardCornerRadius="@dimen/space_8">
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="8dp">
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/txtNameRepository"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="#0366D6"
+            android:textSize="20sp"
+            tools:text="BaseMVVM" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/txtDescription"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:maxLines="2"
+            android:textColor="#586069"
+            android:textSize="14sp"
+            tools:text="Example using base mvvm" />
+
+        <com.google.android.flexbox.FlexboxLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:flexDirection="row"
+            app:flexWrap="wrap"
+            app:justifyContent="flex_start">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/txtLanguage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#DA5B86"
+                android:textSize="12sp"
+                tools:text="Kotlin" />
+            <Space
+                android:layout_width="8dp"
+                android:layout_height="wrap_content" />
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/txtStar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/ic_star"
+                android:drawablePadding="4dp"
+                android:textColor="#586069"
+                android:textSize="12sp"
+                tools:text="3" />
+            <Space
+                android:layout_width="8dp"
+                android:layout_height="wrap_content" />
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/txtForked"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableStart="@drawable/ic_fork"
+                android:drawablePadding="4dp"
+                android:textColor="#586069"
+                android:textSize="12sp"
+                tools:text="4" />
+
+            <Space
+                android:layout_width="8dp"
+                android:layout_height="wrap_content" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/txtUpdateAt"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textColor="#586069"
+                android:textSize="12sp"
+                tools:text="Update At:" />
+        </com.google.android.flexbox.FlexboxLayout>
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
+</com.google.android.material.card.MaterialCardView>
