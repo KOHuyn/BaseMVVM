@@ -15,15 +15,10 @@ import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.viewbinding.ViewBinding
 import androidx.viewpager.widget.ViewPager
 import com.core.BaseActivity
 import com.core.BaseFragment
-import com.google.gson.Gson
-import com.google.gson.JsonArray
-import com.google.gson.JsonObject
 import com.jakewharton.rxbinding2.view.RxView
-import com.utils.ListOfSomething
 import com.utils.LogUtil
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
@@ -37,24 +32,6 @@ fun View.clickWithDebounce(debounceTime: Long = 600L, action: (view: View) -> Un
         RxView.clicks(this)
                 .throttleFirst(debounceTime, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
                 .subscribe { action(this) }
-
-inline fun <reified T> Gson.toList(json: String): List<T> =
-        fromJson<List<T>>(
-                json,
-                ListOfSomething<T>(T::class.java)
-        )
-
-inline fun <reified T> Gson.toList(jsonArr: JsonArray): List<T> =
-        fromJson<List<T>>(
-                jsonArr,
-                ListOfSomething<T>(T::class.java)
-        )
-
-inline fun <reified T> Gson.toList(jsonObject: JsonObject): List<T> =
-        fromJson<List<T>>(
-                jsonObject,
-                ListOfSomething<T>(T::class.java)
-        )
 
 fun View.show() {
     visibility = View.VISIBLE

@@ -4,6 +4,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.core.BaseViewHolder
 import com.core.OnItemClick
 import com.kohuyn.basemvvm.R
 import com.kohuyn.basemvvm.data.model.User
@@ -15,7 +16,7 @@ import com.utils.ext.clickWithDebounce
 /**
  * Created by KOHuyn on 2/1/2021
  */
-class UserAdapter : RecyclerView.Adapter<UserAdapter.UserViewHolder>() {
+class UserAdapter : RecyclerView.Adapter<BaseViewHolder<ItemUserBinding>>() {
 
     var items = mutableListOf<User>()
         set(value) {
@@ -23,21 +24,20 @@ class UserAdapter : RecyclerView.Adapter<UserAdapter.UserViewHolder>() {
             notifyDataSetChanged()
         }
 
-    var onItemClick: OnItemClick? = null
+    var onItemClick: OnItemClick<User>? = null
 
-    inner class UserViewHolder(view: ItemUserBinding) : RecyclerView.ViewHolder(view.root) {
-        val binding = view
-    }
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): UserViewHolder {
-        return UserViewHolder(
+    override fun onCreateViewHolder(
+        parent: ViewGroup,
+        viewType: Int
+    ): BaseViewHolder<ItemUserBinding> {
+        return BaseViewHolder(
             ItemUserBinding.inflate(
                 LayoutInflater.from(parent.context), parent, false
             )
         )
     }
 
-    override fun onBindViewHolder(holder: UserViewHolder, position: Int) {
+    override fun onBindViewHolder(holder: BaseViewHolder<ItemUserBinding>, position: Int) {
         val item = items[position]
         with(holder) {
             binding.imgAvatarUser.show(item.avatarUrl)
@@ -45,7 +45,7 @@ class UserAdapter : RecyclerView.Adapter<UserAdapter.UserViewHolder>() {
             binding.txtUrlGitUser.setTextNotNull(item.htmlUrl)
         }
         holder.itemView.clickWithDebounce {
-            onItemClick?.onItemClickListener(it, position)
+            onItemClick?.onItemClickListener(item, position)
         }
     }
 

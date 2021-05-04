@@ -7,8 +7,8 @@ import com.kohuyn.basemvvm.data.model.Repository
 import com.kohuyn.basemvvm.data.model.User
 import com.kohuyn.basemvvm.ui.getErrorMsg
 import com.utils.SchedulerProvider
+import com.utils.ext.fromJson
 import com.utils.ext.log
-import com.utils.ext.toList
 import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.PublishSubject
 
@@ -31,7 +31,7 @@ class RepositoriesViewModel(
                 isLoading.onNext(false)
                 if (response.toString() != "[]") {
                     try {
-                        val repositories: List<Repository> = gson.toList(response)
+                        val repositories: List<Repository> = gson.fromJson<List<Repository>>(response)
                         rxRepositories.onNext(repositories)
                     } catch (e: Exception) {
                         e.log()

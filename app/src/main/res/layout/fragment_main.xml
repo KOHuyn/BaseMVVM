@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:background="#0F1838">
 
-    <androidx.recyclerview.widget.RecyclerView
+    <com.widget.SwipeRecyclerView
         android:id="@+id/rcvUserGit"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

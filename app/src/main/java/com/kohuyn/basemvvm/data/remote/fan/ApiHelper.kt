@@ -1,4 +1,4 @@
-package com.kohuyn.basemvvm.data.remote
+package com.kohuyn.basemvvm.data.remote.fan
 
 import com.google.gson.JsonArray
 import io.reactivex.Single

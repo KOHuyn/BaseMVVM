@@ -2,7 +2,7 @@ package com.kohuyn.basemvvm.data
 
 import com.google.gson.JsonArray
 import com.kohuyn.basemvvm.data.local.prefs.PrefsHelper
-import com.kohuyn.basemvvm.data.remote.ApiHelper
+import com.kohuyn.basemvvm.data.remote.fan.ApiHelper
 import io.reactivex.Single
 
 /**

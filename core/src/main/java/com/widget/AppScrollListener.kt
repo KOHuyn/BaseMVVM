@@ -21,7 +21,7 @@ abstract class AppScrollListener : RecyclerView.OnScrollListener() {
         }
     }
 
-    private fun findFirstAndLastVisible(layoutManager: androidx.recyclerview.widget.LinearLayoutManager) {
+    private fun findFirstAndLastVisible(layoutManager: LinearLayoutManager) {
         firstVisibleItemPosition = layoutManager.findFirstVisibleItemPosition()
         lastCompletelyVisibleItemPosition = layoutManager.findLastCompletelyVisibleItemPosition()
     }

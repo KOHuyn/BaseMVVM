@@ -2,6 +2,6 @@ package com.core
 
 import android.view.View
 
-fun interface OnItemClick {
-    fun onItemClickListener(view: View, position: Int)
+fun interface OnItemClick<T : Any> {
+    fun onItemClickListener(item: T, position: Int)
 }
