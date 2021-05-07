@@ -6,6 +6,7 @@ import com.core.BaseViewModel
 import com.google.gson.Gson
 import com.kohuyn.basemvvm.data.DataManager
 import com.kohuyn.basemvvm.data.model.User
+import com.kohuyn.basemvvm.data.remote.retrofit.ApiHelper
 import com.kohuyn.basemvvm.data.remote.retrofit.ApiService
 import com.kohuyn.basemvvm.ui.getErrorMsg
 import com.utils.SchedulerProvider
@@ -21,7 +22,7 @@ import kotlin.coroutines.coroutineContext
  * Created by KOHuyn on 1/29/2021
  */
 class MainViewModel(
-    private val apiService: ApiService,
+    private val apiHelper: ApiHelper,
     private val gson: Gson
 ) :
     ViewModel() {
@@ -56,12 +57,12 @@ class MainViewModel(
     fun getAllUser() {
         viewModelScope.launch {
             isLoading.onNext(true)
-            val response = apiService.getUsers()
+            val response = apiHelper.getUsers("XXX")
             if (response.toString() != "[]") {
                 isLoading.onNext(false)
                 try {
                     val users = gson.fromJson<List<User>>(response)
-                     rxUsers.onNext(users)
+                    rxUsers.onNext(users)
                 } catch (e: Exception) {
                     e.log()
                 }

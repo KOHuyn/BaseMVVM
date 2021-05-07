@@ -29,6 +29,8 @@ val app_module: Module = module {
     single { GsonBuilder().excludeFieldsWithoutExposeAnnotation().create()!! }
 
     single { RetrofitBuilder.getRetrofit().create(ApiService::class.java) }
+
+    single { com.kohuyn.basemvvm.data.remote.retrofit.AppApiHelper(get()) as com.kohuyn.basemvvm.data.remote.retrofit.ApiHelper }
 }
 
 val baseModule = listOf(app_module, view_module)

@@ -1,16 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#0F1838">
 
-    <com.widget.SwipeRecyclerView
-        android:id="@+id/rcvUserGit"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
-        tools:itemCount="3"
-        tools:listitem="@layout/item_user" />
-</androidx.appcompat.widget.LinearLayoutCompat>
+<com.widget.SwipeRecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/rcvUserGit"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="#0F1838"
+    android:paddingStart="8dp"
+    android:paddingEnd="8dp"
+    app:backgroundRetry="@color/teal_200"
+    app:isRetry="true"
+    app:srcNoData="@drawable/ic_star"
+    app:textColorNoData="@color/white"
+    app:textNoData="Ahuhu không có dữ liệu gì cả :((("
+    app:textSizeNoData="20dp"
+    tools:itemCount="3"
+    tools:listitem="@layout/item_user" />

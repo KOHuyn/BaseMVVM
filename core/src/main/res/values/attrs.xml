@@ -1,9 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-  <declare-styleable name="MaxHeightScrollView">
-    <attr name="maxHeight" format="dimension"/>
-  </declare-styleable>
-  <declare-styleable name="RoundRectCornerImageView">
-    <attr name="radiusRound" format="float"/>
-  </declare-styleable>
+    <declare-styleable name="MaxHeightScrollView">
+        <attr name="maxHeight" format="dimension" />
+    </declare-styleable>
+    <declare-styleable name="RoundRectCornerImageView">
+        <attr name="radiusRound" format="float" />
+    </declare-styleable>
+
+    <declare-styleable name="SwipeRecyclerView">
+        <attr name="textNoData" format="string" />
+        <attr name="textRetry" format="string" />
+        <attr name="srcNoData" format="reference|color" />
+        <attr name="textColorNoData" format="color" />
+        <attr name="textColorRetry" format="color" />
+        <attr name="backgroundRetry" format="reference|color" />
+        <attr name="textSizeNoData" format="dimension" />
+        <attr name="isRetry" format="boolean" />
+
+    </declare-styleable>
+
 </resources>
