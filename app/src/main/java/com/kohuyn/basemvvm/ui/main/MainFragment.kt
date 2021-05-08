@@ -1,6 +1,7 @@
 package com.kohuyn.basemvvm.ui.main
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.widget.Button
 import com.core.BaseFragment
@@ -33,6 +34,9 @@ class MainFragment : BaseFragment<FragmentMainBinding>() {
 
     private val userAdapter by lazy { UserAdapter() }
 
+    private var isLoadMore: Boolean = false
+    private var isLoadingMore: Boolean = false
+
     override fun updateUI(savedInstanceState: Bundle?) {
         binding.rcvUserGit.setUpRcv(userAdapter)
         binding.rcvUserGit.recyclerView.addItemDecoration(
@@ -40,45 +44,71 @@ class MainFragment : BaseFragment<FragmentMainBinding>() {
                 resources.getDimension(R.dimen.space_4).toInt()
             )
         )
-
-//        binding.rcvUserGit.addNoDataLayout(LayoutLoadMoreBinding.inflate(layoutInflater)) {
-//            it.btnReload.clickWithDebounce { mainViewModel.getAllUser() }
-//        }
-//        binding.rcvUserGit.addNoDataLayout(R.layout.layout_load_more) {
-//            it.findViewById<Button>(R.id.btnReload).clickWithDebounce {
-//                mainViewModel.getAllUser()
-//            }
-//        }
-        binding.rcvUserGit.onSwipeLayoutChange = object : SwipeRecyclerView.OnSwipeLayoutChange {
-            override fun setOnRefresh() {
-                mainViewModel.getAllUser()
-            }
-
-            override fun loadMore() {
-                GlobalScope.launch(Dispatchers.Main) {
-                    binding.rcvUserGit.setLoadMoreVisibility(true)
-                    delay(3000)
-                    binding.rcvUserGit.setLoadMoreVisibility(false)
-                }
+//        binding.rcvUserGit.addNoDataLayout(LayoutLoadMoreBinding.inflate(layoutInflater,binding.root,true))
+        binding.rcvUserGit.addNoDataLayout(
+            LayoutLoadMoreBinding.inflate(
+                layoutInflater,
+                binding.root,
+                true
+            )
+        ) {
+            it.btnReload.clickWithDebounce {
+                mainViewModel.getAllUserSafe()
+                binding.rcvUserGit.setNoDataVisibility(false)
             }
         }
+//        binding.rcvUserGit.addNoDataLayout(R.layout.layout_load_more) {
+//            it.findViewById<Button>(R.id.btnReload).clickWithDebounce {
+//                mainViewModel.getAllUserSafe()
+//            }
+//        }
+        binding.rcvUserGit.setOnSwipeLayoutListener({
+            isLoadMore = false
+            mainViewModel.getAllUserSafe()
+            binding.rcvUserGit.setNoDataVisibility(false)
+        }, {
+            isLoadMore = true
+            if (!isLoadingMore) {
+                mainViewModel.getAllUserSafe()
+                Log.e("loadMore: ", "OnLoadMore")
+            }
+        })
 
         callbackViewModel(mainViewModel)
-        mainViewModel.getAllUser()
+        mainViewModel.getAllUserSafe()
         userAdapter.onItemClick = OnItemClick { item, _ ->
-//            val bundle = Bundle().apply {
-//                putString(RepositoriesUserFragment.ARG_NAME, item.login)
-//            }
-//            postNormal(EventNextFragment(RepositoriesUserFragment::class.java, bundle, true))
-            binding.rcvUserGit.setNoDataVisibility(true)
+            val bundle = Bundle().apply {
+                putString(RepositoriesUserFragment.ARG_NAME, item.login)
+            }
+            postNormal(EventNextFragment(RepositoriesUserFragment::class.java, bundle, true))
         }
     }
 
     private fun callbackViewModel(vm: MainViewModel) {
         addDispose(
-            vm.rxUsers.subscribe { userAdapter.items = it.toMutableList() },
-            vm.rxMessage.subscribe { toast(it) },
-            vm.isLoading.subscribe { binding.rcvUserGit.setRefresh(it) }
+            vm.rxUsers.subscribe {
+                if (isLoadMore) {
+                    userAdapter.items.addAll(it.toMutableList())
+                } else {
+                    userAdapter.items = it.toMutableList()
+                }
+            },
+            vm.rxMessage.subscribe {
+                binding.rcvUserGit.textNoData = it
+                toast(it)
+            },
+            vm.isLoading.subscribe {
+                if (isLoadMore) {
+                    isLoadingMore = it
+                    binding.rcvUserGit.setLoadMoreVisibility(it)
+                } else {
+                    binding.rcvUserGit.setRefresh(it)
+                }
+            },
+            vm.rxNoDataCallback.subscribe {
+                binding.rcvUserGit.setNoDataVisibility(it)
+                userAdapter.items.clear()
+            }
         )
     }
 }

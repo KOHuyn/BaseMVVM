@@ -38,7 +38,10 @@ class SwipeRecyclerView : FrameLayout {
     var swipeRefreshLayout: SwipeRefreshLayout = SwipeRefreshLayout(context)
         private set
 
-    var onSwipeLayoutChange: OnSwipeLayoutChange? = null
+    private var onSwipeLayoutChange: OnSwipeLayoutChange? = null
+    private var onLoadMore: OnLoadMore? = null
+    private var onRefresh: OnRefresh? = null
+
     var textNoData: String? = "No Data"
         set(value) {
             field = value
@@ -54,6 +57,27 @@ class SwipeRecyclerView : FrameLayout {
             field = value
             buttonRetry.visibility = if (isRetry) View.VISIBLE else View.GONE
         }
+
+
+    fun setOnLoadMoreListener(callback: () -> Unit) {
+        onLoadMore = OnLoadMore(callback)
+    }
+
+    fun setOnRefreshListener(callback: () -> Unit) {
+        onRefresh = OnRefresh(callback)
+    }
+
+    fun setOnSwipeLayoutListener(onRefresh: () -> Unit, onLoadMore: () -> Unit) {
+        onSwipeLayoutChange = object : OnSwipeLayoutChange {
+            override fun setOnRefresh() {
+                onRefresh()
+            }
+
+            override fun loadMore() {
+                onLoadMore()
+            }
+        }
+    }
 
     @DrawableRes
     var srcImageDescription: Int? = null
@@ -87,16 +111,11 @@ class SwipeRecyclerView : FrameLayout {
     var textColorNoData: Int? = null
         set(value) {
             field = value
+            Log.e("textViewNoData", field.toString())
             if (textColorNoData != null && textColorNoData != 0) {
-                textViewNoData.setTextColor(
-                    ResourcesCompat.getColor(
-                        resources,
-                        textColorNoData!!,
-                        null
-                    )
-                )
+                textViewNoData.setTextColor(textColorNoData!!)
             } else {
-                textViewNoData.setTextColor(Color.BLACK)
+                textViewNoData.setTextColor(Color.WHITE)
             }
         }
 
@@ -105,13 +124,7 @@ class SwipeRecyclerView : FrameLayout {
         set(value) {
             field = value
             if (textColorRetry != null && textColorRetry != 0) {
-                buttonRetry.setTextColor(
-                    ResourcesCompat.getColor(
-                        resources,
-                        textColorRetry!!,
-                        null
-                    )
-                )
+                buttonRetry.setTextColor(textColorRetry!!)
             } else {
                 buttonRetry.setTextColor(Color.WHITE)
             }
@@ -121,10 +134,11 @@ class SwipeRecyclerView : FrameLayout {
     var textSizeNoData: Int? = null
         set(value) {
             field = value
+            Log.e("textViewNoData", field.toString())
             if (textSizeNoData != null && textSizeNoData != 0) {
                 textViewNoData.setTextSize(
-                    TypedValue.COMPLEX_UNIT_SP,
-                    resources.getDimension(textSizeNoData!!)
+                    TypedValue.COMPLEX_UNIT_PX,
+                    textSizeNoData!!.toFloat()
                 )
             } else {
                 textViewNoData.textSize = 20f
@@ -156,21 +170,37 @@ class SwipeRecyclerView : FrameLayout {
         noDataLayout.visibility = if (isVisible) View.VISIBLE else View.GONE
     }
 
-    interface OnSwipeLayoutChange {
+    private interface OnSwipeLayoutChange {
         fun setOnRefresh()
         fun loadMore()
     }
 
-    fun addNoDataLayout(@LayoutRes layout: Int, callback: (view: View) -> Unit) {
+    private fun interface OnLoadMore {
+        fun setOnLoadMoreListener()
+    }
+
+    private fun interface OnRefresh {
+        fun setOnRefreshListener()
+    }
+
+    fun addNoDataLayout(@LayoutRes layout: Int) {
         noDataLayout = LayoutInflater.from(context).inflate(layout, this)
-        this.requestLayout()
+        noDataLayout.visibility = GONE
+    }
+
+    fun addNoDataLayout(@LayoutRes layout: Int, callback: (view: View) -> Unit) {
+        addNoDataLayout(layout)
         callback(noDataLayout)
     }
 
     fun <T : ViewBinding> addNoDataLayout(layout: T, callback: (binding: T) -> Unit) {
-        noDataLayout = layout.root
-        this.requestLayout()
+        addNoDataLayout(layout)
         callback(layout)
+    }
+
+    fun <T : ViewBinding> addNoDataLayout(layout: T) {
+        noDataLayout = layout.root
+        noDataLayout.visibility = GONE
     }
 
     private fun getStyleableId(): IntArray? = R.styleable.SwipeRecyclerView
@@ -204,13 +234,17 @@ class SwipeRecyclerView : FrameLayout {
         loadingLayout.visibility = View.GONE
 
         swipeRefreshLayout.setOnRefreshListener {
+            setNoDataVisibility(false)
+            onRefresh?.setOnRefreshListener()
             onSwipeLayoutChange?.setOnRefresh()
         }
-        recyclerView.addOnScrollListener(object : AppScrollListener() {
-            override fun onLoadMore() {
-                onSwipeLayoutChange?.loadMore()
-            }
-        })
+        recyclerView.addOnScrollListener(
+            object : AppScrollListener() {
+                override fun onLoadMore() {
+                    onLoadMore?.setOnLoadMoreListener()
+                    onSwipeLayoutChange?.loadMore()
+                }
+            })
     }
 
 
@@ -297,46 +331,22 @@ class SwipeRecyclerView : FrameLayout {
             imgDescription.visibility = View.GONE
         }
         textViewNoData = TextView(context).apply {
-            if (textSizeNoData != null && textSizeNoData != 0) {
-                setTextSize(TypedValue.COMPLEX_UNIT_SP, resources.getDimension(textSizeNoData!!))
-            } else {
-                textSize = 20f
-            }
-
+            textSize = 20f
             text = textNoData
             setPadding(0, 20, 0, 20)
-            if (textColorNoData != null && textColorNoData != 0) {
-                setTextColor(
-                    ResourcesCompat.getColor(
-                        resources,
-                        textColorNoData!!,
-                        null
-                    )
-                )
-            } else {
-                setTextColor(Color.BLACK)
-            }
+            setTextColor(Color.WHITE)
         }
         rootView.addView(textViewNoData, wrapLayout)
         buttonRetry = Button(context).apply {
             text = textRetry
-            if (textColorRetry != null && textColorRetry != 0) {
-                setTextColor(
-                    ResourcesCompat.getColor(
-                        resources,
-                        textColorRetry!!,
-                        null
-                    )
-                )
-            } else {
-                setTextColor(Color.WHITE)
-            }
-            if (backgroundButtonRetry != null && backgroundButtonRetry != 0) {
-                background = ResourcesCompat.getDrawable(resources, backgroundButtonRetry!!, null)
-            }
+            setPadding(20, 20, 20, 20)
+            setTextColor(Color.WHITE)
         }
         rootView.addView(buttonRetry, wrapLayout)
-        buttonRetry.setOnClickListener { onSwipeLayoutChange?.setOnRefresh() }
+        buttonRetry.setOnClickListener {
+            setNoDataVisibility(false)
+            onSwipeLayoutChange?.setOnRefresh()
+        }
         return rootView
     }
 
