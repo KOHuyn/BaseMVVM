@@ -1,20 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<com.widget.SwipeRecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
+<com.widget.pulltorefresh.RefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/rcvUserGit"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="#0F1838"
-    android:paddingStart="8dp"
-    android:paddingEnd="8dp"
-    app:backgroundRetry="@color/purple_500"
-    app:isRetry="false"
-    app:textColorNoData="@color/colorPrimary"
-    app:textColorRetry="@color/black"
-    app:textNoData="Không có dữ liệu"
-    app:textSizeNoData="18sp"
-    app:textRetry="Thử lại ngay :D"
-    tools:itemCount="3"
-    tools:listitem="@layout/item_user" />
+    android:layout_height="match_parent"
+    app:empty_layout="@layout/nodata">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rcvUserGit"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+</com.widget.pulltorefresh.RefreshLayout><!--<com.widget.SwipeRecyclerView xmlns:android="http://schemas.android.com/apk/res/android"-->
+    <!--    xmlns:app="http://schemas.android.com/apk/res-auto"-->
+    <!--    xmlns:tools="http://schemas.android.com/tools"-->
+    <!--    android:id="@+id/rcvUserGit"-->
+    <!--    android:layout_width="match_parent"-->
+    <!--    android:layout_height="wrap_content"-->
+    <!--    android:background="#0F1838"-->
+    <!--    android:paddingStart="8dp"-->
+    <!--    android:paddingEnd="8dp"-->
+    <!--    app:backgroundRetry="@color/purple_500"-->
+    <!--    app:isRetry="false"-->
+    <!--    app:textColorNoData="@color/colorPrimary"-->
+    <!--    app:textColorRetry="@color/black"-->
+    <!--    app:textNoData="Không có dữ liệu"-->
+    <!--    app:textRetry="Thử lại ngay :D"-->
+    <!--    app:textSizeNoData="18sp"-->
+    <!--    tools:itemCount="3"-->
+    <!--    tools:listitem="@layout/item_user" />-->
+
