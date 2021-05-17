@@ -7,8 +7,12 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.*
 import android.widget.FrameLayout
+import android.widget.ScrollView
 import androidx.annotation.LayoutRes
+import androidx.core.widget.NestedScrollView
+import androidx.recyclerview.widget.RecyclerView
 import com.core.R
+import com.widget.AppScrollListener
 import com.widget.pulltorefresh.utils.DisplayUtils
 import com.widget.pulltorefresh.view.FooterView
 import com.widget.pulltorefresh.view.HeadRefreshView
@@ -449,6 +453,24 @@ class RefreshLayout : FrameLayout {
         if (footHeight >= DisplayUtils.dpToPx(context, loadMore.toFloat())) return
         headHeight2 = DisplayUtils.dpToPx(context, refresh.toFloat()).toFloat()
         footHeight2 = DisplayUtils.dpToPx(context, loadMore.toFloat()).toFloat()
+    }
+
+    fun attachLoadMoreToRecyclerView(rcv: RecyclerView) {
+        rcv.addOnScrollListener((object : AppScrollListener() {
+            override fun onLoadMore() {
+                setLoadMore(true)
+            }
+        }))
+    }
+
+    fun attachLoadMoreToNestedScrollView(scrollView: NestedScrollView) {
+        scrollView.setOnScrollChangeListener(NestedScrollView.OnScrollChangeListener { v, scrollX, scrollY, oldScrollX, oldScrollY ->
+            if (v.getChildAt(v.childCount - 1) != null) {
+                if ((scrollY >= (v.getChildAt(v.childCount - 1)).measuredHeight - v.measuredHeight) && scrollY > oldScrollY) {
+                    setLoadMore(true)
+                }
+            }
+        })
     }
 
 }

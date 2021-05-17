@@ -3,6 +3,7 @@ package com.widget.pulltorefresh.view
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
+import android.graphics.drawable.Drawable
 import android.os.Looper
 import android.util.AttributeSet
 import android.util.Log
@@ -40,6 +41,7 @@ class HeadRefreshView : FrameLayout, HeadView {
 
     private var imageLoadMore: ImageView? = null
     private var textLoadMore: TextView? = null
+    private var drawableLoading: Drawable? = null
 
     private fun init() {
         val linearRoot = LinearLayout(context)

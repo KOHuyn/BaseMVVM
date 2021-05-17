@@ -1,5 +1,6 @@
 package com.kohuyn.basemvvm.ui.main
 
+import android.graphics.drawable.VectorDrawable
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -82,20 +83,16 @@ class MainFragment : BaseFragment<FragmentMainBinding>() {
 //            }
 //        })
         setUpRcv(binding.rcvUserGit, userAdapter)
-        binding.rcvUserGit.addOnScrollListener(object : AppScrollListener() {
-            override fun onLoadMore() {
-                binding.root.setLoadMore(true)
-            }
-        })
+        binding.root.attachLoadMoreToRecyclerView(binding.rcvUserGit)
+        binding.root.getView(ViewRefreshStatus.EMPTY_STATUS).run {
+            this?.findViewById<Button>(R.id.btnRetry)
+                ?.clickWithDebounce { binding.root.setRefresh(true) }
+        }
         binding.root.refreshListener = object : RefreshListener {
             override fun refresh() {
                 Handler(Looper.getMainLooper()).postDelayed({
                     binding.root.finishRefresh()
-                    binding.root.showView(ViewRefreshStatus.EMPTY_STATUS)
                 }, 3000)
-                Handler(Looper.getMainLooper()).postDelayed({
-                    binding.root.showView(ViewRefreshStatus.CONTENT_STATUS)
-                }, 10000)
 
             }
 
