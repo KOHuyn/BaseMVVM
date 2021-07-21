@@ -1,8 +1,6 @@
-package com.kohuyn.basemvvm.data.remote.fan
+package com.kohuyn.basemvvm.data.remote
 
 import com.google.gson.JsonArray
-import com.kohuyn.basemvvm.data.remote.ApiContains
-import com.kohuyn.basemvvm.data.remote.ApiEndPoint
 import com.rx2androidnetworking.Rx2AndroidNetworking
 import io.reactivex.Single
 

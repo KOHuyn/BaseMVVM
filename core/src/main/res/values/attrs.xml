@@ -6,23 +6,4 @@
     <declare-styleable name="RoundRectCornerImageView">
         <attr name="radiusRound" format="float" />
     </declare-styleable>
-
-    <declare-styleable name="SwipeRecyclerView">
-        <attr name="textNoData" format="string" />
-        <attr name="textRetry" format="string" />
-        <attr name="srcNoData" format="reference|color" />
-        <attr name="textColorNoData" format="color" />
-        <attr name="textColorRetry" format="color" />
-        <attr name="backgroundRetry" format="reference|color" />
-        <attr name="textSizeNoData" format="dimension" />
-        <attr name="isRetry" format="boolean" />
-
-    </declare-styleable>
-
-    <declare-styleable name="RefreshLayout">
-        <attr name="error_layout" format="reference" />
-        <attr name="empty_layout" format="reference" />
-        <attr name="loading_layout" format="reference" />
-    </declare-styleable>
-
 </resources>

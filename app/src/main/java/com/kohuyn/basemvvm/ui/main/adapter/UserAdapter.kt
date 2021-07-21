@@ -1,17 +1,15 @@
 package com.kohuyn.basemvvm.ui.main.adapter
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.core.BaseViewHolder
 import com.core.OnItemClick
-import com.kohuyn.basemvvm.R
 import com.kohuyn.basemvvm.data.model.User
 import com.kohuyn.basemvvm.databinding.ItemUserBinding
-import com.kohuyn.basemvvm.ui.utils.setTextNotNull
 import com.kohuyn.basemvvm.ui.utils.show
 import com.utils.ext.clickWithDebounce
+import com.utils.ext.setTextNotNull
 
 /**
  * Created by KOHuyn on 2/1/2021

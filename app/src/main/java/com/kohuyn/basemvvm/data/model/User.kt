@@ -1,15 +1,20 @@
 package com.kohuyn.basemvvm.data.model
 
+import androidx.room.Entity
+import androidx.room.PrimaryKey
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 
 /**
  * Created by KOHuyn on 1/29/2021
  */
+
+@Entity(tableName = "user")
 class User(
     @Expose
     @SerializedName("login")
     val login: String? = null,
+    @PrimaryKey(autoGenerate = false)
     @Expose
     @SerializedName("id")
     val id: Int? = null,

@@ -23,7 +23,9 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_margin="4dp"
-                android:text="Hello" />
+                android:text="Hello"
+                android:textColor="@color/black"
+                android:textSize="18dp" />
 
             <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/txtContent"

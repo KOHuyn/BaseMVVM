@@ -8,6 +8,7 @@ import com.kohuyn.basemvvm.data.model.User
 import com.kohuyn.basemvvm.ui.getErrorMsg
 import com.utils.SchedulerProvider
 import com.utils.ext.fromJson
+import com.utils.ext.fromJsonSafe
 import com.utils.ext.log
 import io.reactivex.disposables.Disposable
 import io.reactivex.subjects.PublishSubject
@@ -21,7 +22,7 @@ class RepositoriesViewModel(
     private val gson: Gson
 ) : BaseViewModel<DataManager>(dataManager, schedulerProvider) {
 
-    val rxRepositories: PublishSubject<List<Repository>> = PublishSubject.create()
+    val rxRepositories: PublishSubject<MutableList<Repository>> = PublishSubject.create()
 
     fun getRepos(name: String): Disposable {
         isLoading.onNext(true)
@@ -30,18 +31,16 @@ class RepositoriesViewModel(
             .subscribe({ response ->
                 isLoading.onNext(false)
                 if (response.toString() != "[]") {
-                    try {
-                        val repositories: List<Repository> = gson.fromJson<List<Repository>>(response)
-                        rxRepositories.onNext(repositories)
-                    } catch (e: Exception) {
-                        e.log()
-                    }
+                    gson.fromJsonSafe<MutableList<Repository>>(response)?.let {
+                        rxRepositories.onNext(it)
+                    } ?: rxRepositories.onNext(mutableListOf())
                 } else {
-                    rxRepositories.onNext(emptyList())
+                    rxRepositories.onNext(mutableListOf())
                 }
             }, {
                 isLoading.onNext(false)
                 rxMessage.onNext(it.getErrorMsg())
+                rxRepositories.onNext(mutableListOf())
                 it.log()
             })
     }

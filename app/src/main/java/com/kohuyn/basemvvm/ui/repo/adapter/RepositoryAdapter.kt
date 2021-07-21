@@ -5,7 +5,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.kohuyn.basemvvm.data.model.Repository
 import com.kohuyn.basemvvm.databinding.ItemRepositoryBinding
-import com.kohuyn.basemvvm.ui.utils.setTextNotNull
+import com.utils.ext.setTextNotNull
 
 /**
  * Created by KOHuyn on 2/1/2021

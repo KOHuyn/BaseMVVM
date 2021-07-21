@@ -11,6 +11,6 @@ import org.koin.dsl.module
  */
 
 val view_module: Module = module {
-    viewModel { MainViewModel(get(), get()) }
+    viewModel { MainViewModel(get(), get(),get()) }
     viewModel { RepositoriesViewModel(get(), get(), get()) }
 }

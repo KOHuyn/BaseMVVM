@@ -1,34 +1,15 @@
 package com.kohuyn.basemvvm.ui.main
 
-import android.graphics.drawable.VectorDrawable
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.util.Log
-import android.view.LayoutInflater
-import android.widget.Button
-import androidx.recyclerview.widget.RecyclerView
 import com.core.BaseFragment
 import com.core.OnItemClick
-import com.event.EventNextFragment
 import com.kohuyn.basemvvm.R
-import com.kohuyn.basemvvm.databinding.DialogYesNoBinding
+import com.kohuyn.basemvvm.data.model.Page
 import com.kohuyn.basemvvm.databinding.FragmentMainBinding
-import com.kohuyn.basemvvm.databinding.LayoutLoadMoreBinding
+import com.kohuyn.basemvvm.ui.dialog.YesNoDialog
 import com.kohuyn.basemvvm.ui.main.adapter.UserAdapter
 import com.kohuyn.basemvvm.ui.repo.RepositoriesUserFragment
 import com.kohuyn.basemvvm.ui.utils.MarginItemDecoration
-import com.utils.ext.clickWithDebounce
-import com.utils.ext.postNormal
-import com.widget.AppScrollListener
-import com.widget.SwipeRecyclerView
-import com.widget.pulltorefresh.RefreshListener
-import com.widget.pulltorefresh.RefreshState
-import com.widget.pulltorefresh.ViewRefreshStatus
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import org.koin.android.viewmodel.ext.android.viewModel
 
 /**
@@ -38,102 +19,111 @@ class MainFragment : BaseFragment<FragmentMainBinding>() {
     override fun getLayoutBinding(): FragmentMainBinding =
         FragmentMainBinding.inflate(layoutInflater)
 
-    private val mainViewModel by viewModel<MainViewModel>()
+    private val vm by viewModel<MainViewModel>()
+
+    //demo paging recyclerView
+    private var isDataWithDb: Boolean = false
+
+    //custom fake page in db
+    private val page by lazy { Page() }
 
     private val userAdapter by lazy { UserAdapter() }
 
-    private var isLoadMore: Boolean = false
-    private var isLoadingMore: Boolean = false
+    //show popup once
+    private var isShowPopupSaveDb = true
 
     override fun updateUI(savedInstanceState: Bundle?) {
+        callbackViewModel()
+        setupView()
+        handleClick()
+    }
 
-//        binding.rcvUserGit.setUpRcv(userAdapter)
-//        binding.rcvUserGit.recyclerView.addItemDecoration(
-//            MarginItemDecoration(
-//                resources.getDimension(R.dimen.space_4).toInt()
-//            )
-//        )
-//        binding.rcvUserGit.addNoDataLayout(LayoutLoadMoreBinding.inflate(layoutInflater,binding.root,true))
-//        binding.rcvUserGit.addNoDataLayout(
-//            LayoutLoadMoreBinding.inflate(
-//                layoutInflater,
-//                binding.root,
-//                true
-//            )
-//        ) {
-//            it.btnReload.clickWithDebounce {
-//                mainViewModel.getAllUserSafe()
-//                binding.rcvUserGit.setNoDataVisibility(false)
-//            }
-//        }
-//        binding.rcvUserGit.addNoDataLayout(R.layout.layout_load_more) {
-//            it.findViewById<Button>(R.id.btnReload).clickWithDebounce {
-//                mainViewModel.getAllUserSafe()
-//            }
-//        }
-//        binding.rcvUserGit.setOnSwipeLayoutListener({
-//            isLoadMore = false
-//            mainViewModel.getAllUserSafe()
-//            binding.rcvUserGit.setNoDataVisibility(false)
-//        }, {
-//            isLoadMore = true
-//            if (!isLoadingMore) {
-//                mainViewModel.getAllUserSafe()
-//                Log.e("loadMore: ", "OnLoadMore")
-//            }
-//        })
-        setUpRcv(binding.rcvUserGit, userAdapter)
-        binding.root.attachLoadMoreToRecyclerView(binding.rcvUserGit)
-        binding.root.getView(ViewRefreshStatus.EMPTY_STATUS).run {
-            this?.findViewById<Button>(R.id.btnRetry)
-                ?.clickWithDebounce { binding.root.setRefresh(true) }
-        }
-        binding.root.refreshListener = object : RefreshListener {
-            override fun refresh() {
-                Handler(Looper.getMainLooper()).postDelayed({
-                    binding.root.finishRefresh()
-                }, 3000)
+    private fun setupView() {
+        toast("Bạn đã vào app ${vm.countOpenApp} lần ^^")
+        vm.countOpenApp++
+        binding.rcvUserGit.setUpRcv(userAdapter)
+        binding.rcvUserGit.getRcv().addItemDecoration(
+            MarginItemDecoration(resources.getDimensionPixelOffset(R.dimen.space_4))
+        )
+    }
 
-            }
-
-            override fun loadMore() {
-                Handler(Looper.getMainLooper()).postDelayed({ binding.root.finishLoadMore() }, 3000)
-            }
-        }
-        callbackViewModel(mainViewModel)
-        mainViewModel.getAllUserSafe()
+    private fun handleClick() {
         userAdapter.onItemClick = OnItemClick { item, _ ->
-            val bundle = Bundle().apply {
-                putString(RepositoriesUserFragment.ARG_NAME, item.login)
+            item.login?.let { RepositoriesUserFragment.openFragment(it) } ?: toast("Error unknown")
+        }
+        binding.rcvUserGit.setOnRefreshListener {
+            if (isDataWithDb) {
+                vm.getUserFromDbLimit()
+            } else {
+                vm.getAllUserApi()
             }
-            postNormal(EventNextFragment(RepositoriesUserFragment::class.java, bundle, true))
+        }
+        binding.rcvUserGit.setOnLoadMoreListener {
+            if (isDataWithDb) {
+                page.onLoadMore { nextPage ->
+                    toast("Page $nextPage")
+                    vm.getUserFromDbLimit(false, nextPage)
+                }
+            }
         }
     }
 
-    private fun callbackViewModel(vm: MainViewModel) {
+    private fun callbackViewModel() {
         addDispose(
             vm.rxUsers.subscribe {
-                if (isLoadMore) {
-                    userAdapter.items.addAll(it.toMutableList())
+                userAdapter.items = it.toMutableList()
+            },
+            vm.rxUsersWithPage.subscribe {
+                val items = it.first
+                val pageResponse = it.second
+                page.applyPageResponse(pageResponse)
+                if (page.currentPage == 1) {
+                    binding.rcvUserGit.setShowViewNoData(items.isEmpty())
+                    userAdapter.items = items
                 } else {
-                    userAdapter.items = it.toMutableList()
+                    userAdapter.items.addAll(items)
                 }
+                binding.rcvUserGit.updateLayout()
             },
             vm.rxMessage.subscribe {
                 toast(it)
             },
             vm.isLoading.subscribe {
-                if (isLoadMore) {
-                    isLoadingMore = it
-                    binding.root.setLoadMore(it)
+                if (page.isLoading) {
+                    binding.rcvUserGit.isLoadMore = it
                 } else {
-                    binding.root.setRefresh(it)
+                    binding.rcvUserGit.isRefreshing = it
                 }
             },
-//            vm.rxNoDataCallback.subscribe {
-//                binding.rcvUserGit.setNoDataVisibility(it)
-//                userAdapter.items.clear()
-//            }
+            vm.rxIsSaveDb.subscribe {
+                if (isShowPopupSaveDb) {
+                    isShowPopupSaveDb = false
+                    YesNoDialog.Builder(parentFragmentManager)
+                        .setTitle("Lưu dữ liệu vào db")
+                        .setMessage("Bạn có muốn lưu dữ liệu vào db không?")
+                        .setButtonAccept("Có") {
+                            vm.saveAllUserInDb(it)
+                        }
+                        .setButtonCancel("Không") {}
+                }
+            }, vm.rxUserInDbAvailable.subscribe { isAvailable ->
+                if (isAvailable) {
+                    YesNoDialog.Builder(parentFragmentManager)
+                        .setTitle("Lấy dữ liệu từ db")
+                        .setMessage("Bạn có muốn lấy dữ liệu từ db không?")
+                        .setButtonAccept("Có") {
+                            vm.getUserFromDbLimit()
+                            isDataWithDb = true
+                        }
+                        .setButtonCancel("Không") {
+                            vm.getAllUserApi()
+                            isDataWithDb = false
+                        }
+                } else {
+                    vm.getAllUserApi()
+                    isDataWithDb = false
+                }
+            }
         )
     }
 }

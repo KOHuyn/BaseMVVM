@@ -20,12 +20,3 @@ fun ImageView.show(url: String?) {
         .load(url).apply(requestOptions)
         .into(this)
 }
-
-fun TextView.setTextNotNull(text: String?) {
-    if (text == null || text == "" || text == "null") {
-        this.visibility = View.GONE
-    } else {
-        this.text = text.toString()
-        this.visibility = View.VISIBLE
-    }
-}
