@@ -19,6 +19,6 @@ data class Page(
     fun applyPageResponse(pageResponse:Page){
         isNextPage = pageResponse.isNextPage
         currentPage = pageResponse.currentPage
-        isLoading = pageResponse.isLoading
+        isLoading = false
     }
 }

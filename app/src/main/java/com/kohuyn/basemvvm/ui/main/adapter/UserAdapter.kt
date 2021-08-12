@@ -3,8 +3,10 @@ package com.kohuyn.basemvvm.ui.main.adapter
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import androidx.viewbinding.ViewBinding
 import com.core.BaseViewHolder
 import com.core.OnItemClick
+import com.core.adapter.BaseAdapter
 import com.kohuyn.basemvvm.data.model.User
 import com.kohuyn.basemvvm.databinding.ItemUserBinding
 import com.kohuyn.basemvvm.ui.utils.show
@@ -14,20 +16,14 @@ import com.utils.ext.setTextNotNull
 /**
  * Created by KOHuyn on 2/1/2021
  */
-class UserAdapter : RecyclerView.Adapter<BaseViewHolder<ItemUserBinding>>() {
-
-    var items = mutableListOf<User>()
-        set(value) {
-            field = value
-            notifyDataSetChanged()
-        }
+class UserAdapter : BaseAdapter<ItemUserBinding>() {
 
     var onItemClick: OnItemClick<User>? = null
-
-    override fun onCreateViewHolder(
+    override fun getItemCount(): Int = items.size
+    override fun onCreateChildViewHolder(
         parent: ViewGroup,
         viewType: Int
-    ): BaseViewHolder<ItemUserBinding> {
+    ): BaseViewHolder<ViewBinding> {
         return BaseViewHolder(
             ItemUserBinding.inflate(
                 LayoutInflater.from(parent.context), parent, false
@@ -35,8 +31,8 @@ class UserAdapter : RecyclerView.Adapter<BaseViewHolder<ItemUserBinding>>() {
         )
     }
 
-    override fun onBindViewHolder(holder: BaseViewHolder<ItemUserBinding>, position: Int) {
-        val item = items[position]
+    override fun onBindChildViewHolder(holder: BaseViewHolder<ItemUserBinding>, position: Int) {
+        val item = items[position] as User
         with(holder) {
             binding.imgAvatarUser.show(item.avatarUrl)
             binding.txtNameUser.setTextNotNull(item.login)
@@ -46,7 +42,5 @@ class UserAdapter : RecyclerView.Adapter<BaseViewHolder<ItemUserBinding>>() {
             onItemClick?.onItemClickListener(item, position)
         }
     }
-
-    override fun getItemCount(): Int = items.size
 
 }

@@ -1,6 +1,9 @@
 package com.kohuyn.basemvvm.ui.main
 
+import android.os.Handler
+import android.os.Looper
 import com.core.BaseViewModel
+import com.core.adapter.StatusRecyclerView
 import com.google.gson.Gson
 import com.kohuyn.basemvvm.data.DataManager
 import com.kohuyn.basemvvm.data.model.Page
@@ -20,10 +23,6 @@ class MainViewModel(
     private val gson: Gson
 ) : BaseViewModel<DataManager>(dataManager, schedulerProvider) {
 
-    init {
-        getUserFromDbLimit(true)
-    }
-
     var countOpenApp: Int
         get() = dataManager.countOpenApp
         set(value) {
@@ -38,25 +37,24 @@ class MainViewModel(
 
     val rxUserInDbAvailable: PublishSubject<Boolean> = PublishSubject.create()
 
-    fun getAllUserApi(): Disposable {
-        isLoading.onNext(true)
+    val rxStatusRcv: PublishSubject<StatusRecyclerView> = PublishSubject.create()
+
+    fun getAllUserApi(isRefreshing: Boolean): Disposable {
+        rxStatusRcv.onStatusLoading(true, isRefresh = isRefreshing)
         return dataManager.getAllUser()
             .compose(schedulerProvider.ioToMainSingleScheduler())
             .subscribe({ response ->
-                isLoading.onNext(false)
+                rxStatusRcv.onStatusLoading(false, isRefresh = isRefreshing)
                 if (response.toString() != "[]") {
                     gson.fromJsonSafe<MutableList<User>>(response)?.let {
                         rxUsers.onNext(it)
                         rxIsSaveDb.onNext(it)
-                    }
-                        ?: rxUsers.onNext(mutableListOf())
+                    } ?: rxStatusRcv.onStatusError("Kiểu dữ liệu không phù hợp", null)
                 } else {
-                    rxUsers.onNext(mutableListOf())
+                    rxStatusRcv.onStatusError("Oops \nKhông có dữ liệu nào cả", showButton = true)
                 }
             }, {
-                isLoading.onNext(false)
-                rxMessage.onNext(it.getErrorMsg())
-                rxUsers.onNext(mutableListOf())
+                rxStatusRcv.onStatusError(it.getErrorMsg(), null, true)
                 it.log()
             })
     }
@@ -72,25 +70,32 @@ class MainViewModel(
             })
     }
 
-    fun getUserFromDbLimit(isCheckAvailable: Boolean = false, page: Int = 1): Disposable {
-        isLoading.onNext(true)
+    fun getUserFromDbLimit(
+        isCheckAvailable: Boolean = false,
+        page: Int = 1,
+        isRefreshing: Boolean = false
+    ): Disposable {
+        rxStatusRcv.onStatusLoading(true, page, isRefreshing)
         return dataManager.getUserLimit()
             .compose(schedulerProvider.ioToMainObservableScheduler())
             .subscribe({
-                isLoading.onNext(false)
-                if (isCheckAvailable) {
-                    rxUserInDbAvailable.onNext(it.isNotEmpty())
-                } else {
-                    rxUsersWithPage.onNext(
-                        Pair(
-                            it.toMutableList(),
-                            Page(true, page, false)
+                Handler(Looper.getMainLooper()).postDelayed({
+                    rxStatusRcv.onStatusLoading(false, page, isRefreshing)
+                    if (isCheckAvailable) {
+                        rxUserInDbAvailable.onNext(it.isNotEmpty())
+                    } else {
+
+                        rxUsersWithPage.onNext(
+                            Pair(
+                                it.toMutableList(),
+                                Page(true, page, false)
+                            )
                         )
-                    )
-                }
+
+                    }
+                }, 2000)
             }, {
-                isLoading.onNext(false)
-                rxUsersWithPage.onNext(Pair(mutableListOf(), Page(true, page, false)))
+                rxStatusRcv.onStatusError(it.getErrorMsg(), null, showButton = true)
                 it.log()
             })
     }

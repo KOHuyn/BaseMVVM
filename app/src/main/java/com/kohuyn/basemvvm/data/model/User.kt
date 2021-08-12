@@ -2,6 +2,7 @@ package com.kohuyn.basemvvm.data.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.core.adapter.BaseItemRecyclerView
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 
@@ -66,4 +67,7 @@ class User(
     @Expose
     @SerializedName("site_admin")
     val siteAdmin: Boolean? = null
-)
+) : BaseItemRecyclerView {
+    override val itemType: Int
+        get() = 1
+}

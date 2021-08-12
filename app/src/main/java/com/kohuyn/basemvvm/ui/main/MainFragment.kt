@@ -10,6 +10,7 @@ import com.kohuyn.basemvvm.ui.dialog.YesNoDialog
 import com.kohuyn.basemvvm.ui.main.adapter.UserAdapter
 import com.kohuyn.basemvvm.ui.repo.RepositoriesUserFragment
 import com.kohuyn.basemvvm.ui.utils.MarginItemDecoration
+import com.utils.ext.setOnLoadMoreListener
 import org.koin.android.viewmodel.ext.android.viewModel
 
 /**
@@ -34,6 +35,7 @@ class MainFragment : BaseFragment<FragmentMainBinding>() {
 
     override fun updateUI(savedInstanceState: Bundle?) {
         callbackViewModel()
+        vm.getUserFromDbLimit(true)
         setupView()
         handleClick()
     }
@@ -41,21 +43,22 @@ class MainFragment : BaseFragment<FragmentMainBinding>() {
     private fun setupView() {
         toast("Bạn đã vào app ${vm.countOpenApp} lần ^^")
         vm.countOpenApp++
-        binding.rcvUserGit.setUpRcv(userAdapter)
-        binding.rcvUserGit.getRcv().addItemDecoration(
+        setUpRcv(binding.rcvUserGit, userAdapter)
+        binding.rcvUserGit.addItemDecoration(
             MarginItemDecoration(resources.getDimensionPixelOffset(R.dimen.space_4))
         )
+        userAdapter.attachWithRefreshLayout(binding.refreshLayout)
     }
 
     private fun handleClick() {
         userAdapter.onItemClick = OnItemClick { item, _ ->
             item.login?.let { RepositoriesUserFragment.openFragment(it) } ?: toast("Error unknown")
         }
-        binding.rcvUserGit.setOnRefreshListener {
+        binding.refreshLayout.setOnRefreshListener {
             if (isDataWithDb) {
-                vm.getUserFromDbLimit()
+                vm.getUserFromDbLimit(isRefreshing = true)
             } else {
-                vm.getAllUserApi()
+                vm.getAllUserApi(true)
             }
         }
         binding.rcvUserGit.setOnLoadMoreListener {
@@ -71,29 +74,24 @@ class MainFragment : BaseFragment<FragmentMainBinding>() {
     private fun callbackViewModel() {
         addDispose(
             vm.rxUsers.subscribe {
-                userAdapter.items = it.toMutableList()
+                userAdapter.setData(it)
             },
             vm.rxUsersWithPage.subscribe {
                 val items = it.first
                 val pageResponse = it.second
                 page.applyPageResponse(pageResponse)
                 if (page.currentPage == 1) {
-                    binding.rcvUserGit.setShowViewNoData(items.isEmpty())
-                    userAdapter.items = items
+                    userAdapter.setData(items)
                 } else {
-                    userAdapter.items.addAll(items)
+                    userAdapter.addDataLoadMore(items)
                 }
-                binding.rcvUserGit.updateLayout()
             },
+            vm.rxStatusRcv.subscribe { userAdapter.updateStatusAdapter(it) },
             vm.rxMessage.subscribe {
                 toast(it)
             },
             vm.isLoading.subscribe {
-                if (page.isLoading) {
-                    binding.rcvUserGit.isLoadMore = it
-                } else {
-                    binding.rcvUserGit.isRefreshing = it
-                }
+                if (it) showDialog() else hideDialog()
             },
             vm.rxIsSaveDb.subscribe {
                 if (isShowPopupSaveDb) {
@@ -116,11 +114,11 @@ class MainFragment : BaseFragment<FragmentMainBinding>() {
                             isDataWithDb = true
                         }
                         .setButtonCancel("Không") {
-                            vm.getAllUserApi()
+                            vm.getAllUserApi(false)
                             isDataWithDb = false
                         }
                 } else {
-                    vm.getAllUserApi()
+                    vm.getAllUserApi(false)
                     isDataWithDb = false
                 }
             }
